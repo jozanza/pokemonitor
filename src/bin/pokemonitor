@@ -1,0 +1,97 @@
+#!/usr/bin/env node
+
+const program = require('commander')
+  .version('0.0.1')
+  .description('Get notified about Pokémon near a location')
+  .usage('[options] <lat>,<lng>')
+  .option(
+    '-a, --alias <name>',
+    'Location alias for geo coordinates',
+    'your location'
+  )
+  .option(
+    '-s, --sms <to>,<from>',
+    'Phone numbers to send text message to and from',
+    x => x.split(','),
+    []
+  )
+  .option(
+    '-t, --twilio <SID>,<token>',
+    'Your Twilio Account SID and Twilio Auth Token (https://www.twilio.com/console)',
+    x => x.split(','),
+    []
+  )
+  .option(
+    '-p, --pokemon <file>',
+    '.csv file of Pokémon you want to get notified about',
+    x => require('fs').readFileSync(x)
+      .toString()
+      .split(',')
+      .map(x => x.trim())
+      .filter(x => x),
+    []
+  )
+  .option(
+    '-i, --interval <seconds>',
+    'How often to search (min 30)',
+    x => Number.isFinite(+x) && +x > 30 ? +x : 30,
+    30
+  )
+  .parse(process.argv)
+
+const locationName = program.alias
+const [ sendTo, sendFrom ] = program.sms
+const [ TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN ] = program.twilio
+const targets = program.pokemon
+const [ lat, lng ] = (program.args[0]||'').split(',').map(Number)
+const interval = program.interval
+
+// Required arguments
+if (!(typeof lat === 'number' && typeof lng === 'number')) {
+  console.error('latitude and longitude are required!')
+  process.exit(1)
+}
+if (targets.length < 1) {
+  console.error('no pokémon given!')
+  process.exit(1)
+}
+
+// Configure
+let LOOP = 0 // for deduping messages
+const nn = require('node-notifier')
+let twilio = null
+if (sendTo && sendFrom && TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+  twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+}
+const desktopCache = new Set()
+const smsCache = new Set()
+const onFind = n => {
+  // Desktop
+  if (!desktopCache.has(`${LOOP}${n.group}`)) {
+    nn.notify(n)
+    desktopCache.add(`${LOOP}${n.group}`)
+  }
+  // SMS
+  if (twilio && !smsCache.has(n.group)) {
+    twilio.sendMessage({
+      to: sendTo,
+      from: sendFrom,
+      body: `${n.message}. View location: ${n.open.replace('https', 'comgooglemapsurl')}` 
+    })
+    smsCache.add(n.group)
+  }
+}
+
+// Start looking
+const search = require('../index')({
+  locationName,
+  lat,
+  lng,
+  onFind,
+  targets
+})
+search()
+setInterval(() => {
+  ++LOOP
+  search()
+}, interval * 1000)

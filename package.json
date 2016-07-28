@@ -1,0 +1,27 @@
+{
+  "name": "pokemonitor",
+  "version": "0.0.1",
+  "description": "Get notified about rare Pokémon",
+  "main": "./dist/index.js",
+  "bin": {
+    "pokemonitor": "./dist/bin/pokemonitor"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prebuild": "rm -rf dist && mkdir -p dist/bin",
+    "build": "npm -s run babel src/index.js > dist/index.js && npm -s run babel src/bin/pokemonitor > dist/bin/pokemonitor",
+    "babel": "./node_modules/.bin/babel"
+  },
+  "author": "Josiah Savary <hello@jsavary.com> (http://jsavary.com)",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "2.9.0",
+    "isomorphic-fetch": "2.2.1",
+    "node-notifier": "4.6.0",
+    "twilio": "2.9.1"
+  },
+  "devDependencies": {
+    "babel-cli": "6.11.4",
+    "babel-preset-es2015": "6.9.0"
+  }
+}
