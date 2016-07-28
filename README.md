@@ -1,3 +1,5 @@
+![magikarp](https://github.com/jozanza/pokemonitor/blob/master/osx1.png?raw=true)
+
 # Pokemonitor
 
 Sends desktop and SMS notifications when Pokémon are near a geolocation. This command uses [Pokevision](https://pokevision.com)'s API.
