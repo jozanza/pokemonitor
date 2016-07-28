@@ -10,7 +10,7 @@ Sends desktop and SMS notifications when Pokémon are near a geolocation. This c
 
 At a minimum, you'll need to pass `pokemonitor` a latitude, a longitude, and a .csv file with the Pokémon you want to get notified about ([here's the list I use](https://gist.githubusercontent.com/jozanza/2ebea6e5bc1a7ac0bc36e1c0a3270de7/raw/431fdca06bb0d66e23804bfb2d91ddb970e30d7e/pokemon.csv)).
 
-You can also pass additional flags to get SMS (via [Twilio](https://twilio.com) and change the polling interval, etc.
+You can also pass additional flags to get SMS (via [Twilio](https://twilio.com)) and change the polling interval, etc.
 
 ```bash
  Usage: pokemonitor [options] <lat>,<lng>
